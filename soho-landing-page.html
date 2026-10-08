@@ -155,6 +155,30 @@ em { font-style: italic; color: var(--accent); }
   padding-top: 140px;
   overflow: hidden;
 }
+.hero__media {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 32%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 32%);
+}
+.hero__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg) 0%, rgba(12, 11, 10, 0) 45%),
+              rgba(12, 11, 10, 0.25);
+}
+.hero__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 28% 20%;
+  animation: slowZoom 24s ease-out both;
+}
+@keyframes slowZoom { from { transform: scale(1.08); } }
 .hero__glow {
   position: absolute;
   inset: -20% -10% auto auto;
@@ -219,6 +243,57 @@ em { font-style: italic; color: var(--accent); }
   font-size: clamp(30px, 4.2vw, 56px);
   line-height: 1.15;
   letter-spacing: -0.005em;
+}
+
+/* ---------- Behind the scenes ---------- */
+.scenes { padding: 0 0 clamp(96px, 14vw, 180px); }
+.scenes__grid {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: clamp(16px, 2vw, 24px);
+}
+.scene {
+  position: relative;
+  margin: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: var(--surface);
+}
+.scene--wide { aspect-ratio: auto; }
+.scene img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1);
+  transition: transform 1.2s var(--ease);
+}
+.scene:hover img { transform: scale(1.04); }
+.scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12, 11, 10, 0.85) 0%, rgba(12, 11, 10, 0) 50%);
+  pointer-events: none;
+}
+.scene figcaption {
+  position: absolute;
+  left: clamp(20px, 3vw, 32px);
+  bottom: clamp(20px, 3vw, 28px);
+  z-index: 1;
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.1;
+}
+.scene figcaption span {
+  display: block;
+  margin-bottom: 8px;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 /* ---------- Avenues ---------- */
@@ -516,6 +591,15 @@ em { font-style: italic; color: var(--accent); }
   .process__inner { grid-template-columns: 1fr; }
 }
 @media (max-width: 720px) {
+  .hero__media {
+    width: 100%;
+    bottom: 35%;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  }
+  .hero__media img { object-position: 38% 15%; }
+  .scenes__grid { grid-template-columns: 1fr; }
+  .scene, .scene--wide { aspect-ratio: 4 / 3; }
   .nav__links { display: none; }
   .logo__text { font-size: 14px; }
   .grid { grid-template-columns: 1fr; }
@@ -557,6 +641,9 @@ em { font-style: italic; color: var(--accent); }
   <main>
     <!-- Hero -->
     <section class="hero">
+      <div class="hero__media" aria-hidden="true">
+        <img src="images/red-carpet.jpg" alt="" fetchpriority="high">
+      </div>
       <div class="hero__glow" aria-hidden="true"></div>
       <div class="container hero__inner">
         <p class="eyebrow reveal">British Film &amp; Television &middot; Soho, London</p>
@@ -605,6 +692,20 @@ em { font-style: italic; color: var(--accent); }
           businesses behind it, and we keep our investors informed about <em>new opportunities</em>
           as they come to market.
         </p>
+      </div>
+    </section>
+
+    <!-- Behind the scenes -->
+    <section class="scenes" aria-label="Behind the scenes">
+      <div class="container scenes__grid">
+        <figure class="scene scene--wide reveal">
+          <img src="images/on-set-vfx.jpg" alt="Film crew on a studio set lit for visual effects" loading="lazy">
+          <figcaption><span>Behind the scenes</span>Studio, set and visual effects</figcaption>
+        </figure>
+        <figure class="scene reveal">
+          <img src="images/camera-on-location.jpg" alt="Cinema camera filming a scene on location at sunset" loading="lazy">
+          <figcaption><span>On location</span>Camera, crew and production</figcaption>
+        </figure>
       </div>
     </section>
 
