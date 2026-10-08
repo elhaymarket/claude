@@ -374,6 +374,79 @@ em { font-style: italic; color: var(--accent); }
 .step h3 { margin: 6px 0 8px; font-size: 20px; font-weight: 500; }
 .step p { margin: 0; color: var(--muted); font-size: 15px; }
 
+/* ---------- Talent carousel ---------- */
+.talent { padding: clamp(96px, 14vw, 180px) 0 0; overflow: hidden; }
+.talent__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: clamp(32px, 5vw, 56px);
+}
+.talent__lead { margin: 24px 0 0; max-width: 480px; color: var(--muted); }
+.talent__controls { display: flex; gap: 12px; flex-shrink: 0; }
+.talent__btn {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  transition: border-color 0.3s, background 0.3s;
+}
+.talent__btn:hover { border-color: var(--accent); background: rgba(201, 164, 106, 0.08); }
+.talent__btn:focus-visible, .talent__track:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.talent__track {
+  display: flex;
+  gap: clamp(14px, 2vw, 24px);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding: 0 max(var(--gutter), calc((100vw - 1240px) / 2 + var(--gutter)));
+  scroll-padding: 0 max(var(--gutter), calc((100vw - 1240px) / 2 + var(--gutter)));
+}
+.talent__track::-webkit-scrollbar { display: none; }
+.talent__card {
+  position: relative;
+  flex: 0 0 clamp(240px, 26vw, 340px);
+  margin: 0;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  scroll-snap-align: start;
+}
+.talent__card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: grayscale(1);
+  transition: transform 1.2s var(--ease);
+}
+.talent__card:hover img { transform: scale(1.04); }
+.talent__card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(12, 11, 10, 0.85) 0%, rgba(12, 11, 10, 0) 45%);
+  pointer-events: none;
+}
+.talent__card figcaption {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 20px;
+  z-index: 1;
+  font-family: var(--serif);
+  font-size: clamp(24px, 2.4vw, 30px);
+  line-height: 1.1;
+}
+.talent__note { margin: 24px 0 0; font-size: 12px; color: var(--muted); }
+
 /* ---------- CTA ---------- */
 .cta { padding: clamp(110px, 16vw, 200px) 0; text-align: center; }
 .cta__inner { display: flex; flex-direction: column; align-items: center; gap: 44px; }
@@ -599,6 +672,8 @@ em { font-style: italic; color: var(--accent); }
   }
   .hero__media img { object-position: 38% 15%; }
   .scenes__grid { grid-template-columns: 1fr; }
+  .talent__head { align-items: flex-start; flex-direction: column; }
+  .talent__card { flex-basis: 72vw; }
   .scene, .scene--wide { aspect-ratio: 4 / 3; }
   .nav__links { display: none; }
   .logo__text { font-size: 14px; }
@@ -782,6 +857,54 @@ em { font-style: italic; color: var(--accent); }
             </div>
           </li>
         </ol>
+      </div>
+    </section>
+
+    <!-- Talent carousel -->
+    <section class="talent" aria-labelledby="talent-title">
+      <div class="container">
+        <div class="talent__head reveal">
+          <div>
+            <p class="eyebrow">On screen</p>
+            <h2 class="section-title" id="talent-title">A-list talent,<br><em>British craft.</em></h2>
+            <p class="talent__lead">The companies behind our opportunities have worked with A-list talent, including:</p>
+          </div>
+          <div class="talent__controls">
+            <button class="talent__btn" type="button" data-talent-prev aria-label="Previous">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="talent__btn" type="button" data-talent-next aria-label="Next">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="talent__track" tabindex="0" aria-label="Talent carousel">
+        <figure class="talent__card">
+          <img src="images/talent-4.jpg" alt="Johnny Depp" loading="lazy">
+          <figcaption>Johnny Depp</figcaption>
+        </figure>
+        <figure class="talent__card">
+          <img src="images/talent-1.jpg" alt="Alexander Skarsgård" loading="lazy">
+          <figcaption>Alexander Skarsgård</figcaption>
+        </figure>
+        <figure class="talent__card">
+          <img src="images/talent-2.jpg" alt="Scott Adkins" loading="lazy">
+          <figcaption>Scott Adkins</figcaption>
+        </figure>
+        <figure class="talent__card">
+          <img src="images/talent-3.jpg" alt="Melissa George" loading="lazy">
+          <figcaption>Melissa George</figcaption>
+        </figure>
+        <figure class="talent__card">
+          <img src="images/talent-5.jpg" alt="Stephen Graham" loading="lazy">
+          <figcaption>Stephen Graham</figcaption>
+        </figure>
+      </div>
+
+      <div class="container">
+        <p class="talent__note">The individuals shown have worked on productions with these companies. They do not endorse Soho Investment Group or any investment.</p>
       </div>
     </section>
 
@@ -1220,6 +1343,32 @@ if ("IntersectionObserver" in window) {
   });
 } else {
   document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
+}
+
+// Talent carousel: arrows, plus a gentle auto-advance that pauses on hover or touch
+const track = document.querySelector(".talent__track");
+if (track) {
+  const step = () => {
+    const card = track.querySelector(".talent__card");
+    return card ? card.getBoundingClientRect().width + parseFloat(getComputedStyle(track).columnGap || 0) : 300;
+  };
+  const atEnd = () => track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+  const next = () => (atEnd() ? track.scrollTo({ left: 0 }) : track.scrollBy({ left: step() }));
+  const prev = () => (track.scrollLeft <= 4 ? track.scrollTo({ left: track.scrollWidth }) : track.scrollBy({ left: -step() }));
+
+  let paused = false;
+  let lastClick = 0;
+  document.querySelector("[data-talent-next]").addEventListener("click", () => { lastClick = Date.now(); next(); });
+  document.querySelector("[data-talent-prev]").addEventListener("click", () => { lastClick = Date.now(); prev(); });
+
+  ["mouseenter", "touchstart", "focusin"].forEach((ev) => track.addEventListener(ev, () => (paused = true), { passive: true }));
+  ["mouseleave", "focusout"].forEach((ev) => track.addEventListener(ev, () => (paused = false)));
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduceMotion) {
+    setInterval(() => {
+      if (!paused && quiz.hidden && !document.hidden && Date.now() - lastClick > 6000) next();
+    }, 4000);
+  }
 }
 
 // Open the questionnaire straight away from links ending in #quiz or ?quiz

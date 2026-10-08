@@ -338,6 +338,32 @@ if ("IntersectionObserver" in window) {
   document.querySelectorAll(".reveal").forEach((el) => el.classList.add("is-visible"));
 }
 
+// Talent carousel: arrows, plus a gentle auto-advance that pauses on hover or touch
+const track = document.querySelector(".talent__track");
+if (track) {
+  const step = () => {
+    const card = track.querySelector(".talent__card");
+    return card ? card.getBoundingClientRect().width + parseFloat(getComputedStyle(track).columnGap || 0) : 300;
+  };
+  const atEnd = () => track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
+  const next = () => (atEnd() ? track.scrollTo({ left: 0 }) : track.scrollBy({ left: step() }));
+  const prev = () => (track.scrollLeft <= 4 ? track.scrollTo({ left: track.scrollWidth }) : track.scrollBy({ left: -step() }));
+
+  let paused = false;
+  let lastClick = 0;
+  document.querySelector("[data-talent-next]").addEventListener("click", () => { lastClick = Date.now(); next(); });
+  document.querySelector("[data-talent-prev]").addEventListener("click", () => { lastClick = Date.now(); prev(); });
+
+  ["mouseenter", "touchstart", "focusin"].forEach((ev) => track.addEventListener(ev, () => (paused = true), { passive: true }));
+  ["mouseleave", "focusout"].forEach((ev) => track.addEventListener(ev, () => (paused = false)));
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduceMotion) {
+    setInterval(() => {
+      if (!paused && quiz.hidden && !document.hidden && Date.now() - lastClick > 6000) next();
+    }, 4000);
+  }
+}
+
 // Open the questionnaire straight away from links ending in #quiz or ?quiz
 if (location.hash === "#quiz" || new URLSearchParams(location.search).has("quiz")) {
   openQuiz();
