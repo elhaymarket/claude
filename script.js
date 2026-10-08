@@ -28,7 +28,7 @@ const AVENUES = {
   },
   av: {
     title: "Audio Visual Investment",
-    text: "Technology and innovation appeal to you. Audio visual covers the cameras, lighting, sound and screen technology the whole industry depends on. We'll send you information on current audio visual opportunities.",
+    text: "Technology and innovation appeal to you. Audio visual centres on home cinemas and the latest screening equipment: premium projection, screens and sound systems that bring the big-screen experience into homes and private venues. We'll send you information on current audio visual opportunities.",
   },
   hmu: {
     title: "Hair and Make-Up Investment",
@@ -50,7 +50,7 @@ const QUESTIONS = [
       { label: "Shaping the idea: scripts, casting and planning", points: { pre: 2 } },
       { label: "Being on set when the cameras roll", points: { production: 2 } },
       { label: "The edit suite: cutting, colour and effects", points: { post: 2 } },
-      { label: "The technology: cameras, lighting and sound", points: { av: 2 } },
+      { label: "The tech: home cinemas and the latest screening equipment", points: { av: 2 } },
       { label: "The look: hair, make-up and prosthetics", points: { hmu: 2 } },
       { label: "Premieres, red carpets and the festival circuit", points: { festival: 2 } },
     ],
@@ -61,7 +61,7 @@ const QUESTIONS = [
       { label: "Independent films heading for festivals", points: { festival: 1, pre: 1 } },
       { label: "High-end drama and streaming series", points: { production: 1, post: 1 } },
       { label: "Period dramas and fantasy with striking looks", points: { hmu: 1, production: 1 } },
-      { label: "Music, live events and immersive experiences", points: { av: 1, festival: 1 } },
+      { label: "Immersive viewing: premium sound and big-screen experiences", points: { av: 1, festival: 1 } },
     ],
   },
   {
@@ -77,7 +77,7 @@ const QUESTIONS = [
     q: "Which of these sounds most appealing to you?",
     options: [
       { label: "Supporting skilled crews and creative talent", points: { hmu: 1, production: 1 } },
-      { label: "Backing the technology and equipment the industry relies on", points: { av: 2 } },
+      { label: "Backing home cinema and the latest screening technology", points: { av: 2 } },
       { label: "Seeing raw footage become a finished piece", points: { post: 2 } },
       { label: "Being part of industry events and screenings", points: { festival: 2 } },
     ],
