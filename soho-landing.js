@@ -737,7 +737,7 @@ const SOHO_MARKUP = `
             </label>
             <label class="check">
               <input type="checkbox" name="consent" required>
-              <span>I agree to Soho Investment Group contacting me by email and phone with information about this investment avenue. I understand these investments are high risk and my capital is at risk.</span>
+              <span>I agree to Soho Investment Group passing my information to the relevant investment. I understand they may contact me by email and phone with information about this investment avenue. I understand these investments are high risk and my capital is at risk.</span>
             </label>
             <p class="form__error" role="alert" hidden></p>
             <button class="btn btn--full" type="submit">Send me the information</button>
