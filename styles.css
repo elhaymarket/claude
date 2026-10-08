@@ -470,13 +470,14 @@ em { font-style: italic; color: var(--accent); }
 .footer__risk strong { color: var(--ink); font-weight: 500; }
 .footer__legal { margin: 28px 0 0; font-size: 13px; color: var(--muted); }
 
-/* ---------- Reveal on scroll ---------- */
-.reveal {
+/* ---------- Reveal on scroll ----------
+   Only hidden when the script is running, so the page never shows blank. */
+.js .reveal {
   opacity: 0;
   transform: translateY(28px);
   transition: opacity 1s var(--ease), transform 1s var(--ease);
 }
-.reveal.is-visible { opacity: 1; transform: none; }
+.js .reveal.is-visible { opacity: 1; transform: none; }
 
 /* ---------- Questionnaire ---------- */
 .quiz {
@@ -678,6 +679,6 @@ em { font-style: italic; color: var(--accent); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .reveal { opacity: 1; transform: none; }
+  .js .reveal { opacity: 1; transform: none; }
   html { scroll-behavior: auto; }
 }
