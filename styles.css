@@ -363,7 +363,7 @@ em { font-style: italic; color: var(--accent); }
 .step p { margin: 0; color: var(--muted); font-size: 15px; }
 
 /* ---------- Talent carousel ---------- */
-.talent { padding: clamp(96px, 14vw, 180px) 0 0; overflow: hidden; }
+.talent { padding: 0 0 clamp(96px, 14vw, 180px); overflow: hidden; }
 .talent__head {
   display: flex;
   align-items: flex-end;
