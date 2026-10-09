@@ -561,6 +561,52 @@ em { font-style: italic; color: var(--accent); }
 }
 .talent__note { margin: 24px 0 0; font-size: 12px; color: var(--muted); }
 
+/* ---------- EIS benefits ---------- */
+.eis { padding: clamp(96px, 14vw, 180px) 0 0; }
+.eis__inner {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+}
+.eis__list { list-style: none; margin: clamp(32px, 5vw, 56px) 0 0; padding: 0; }
+.eis__item {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 36px);
+  padding: 26px 0;
+  border-top: 1px solid var(--line);
+}
+.eis__item:last-child { border-bottom: 1px solid var(--line); }
+.eis__figure {
+  flex: 0 0 clamp(96px, 11vw, 140px);
+  font-family: var(--serif);
+  font-size: clamp(48px, 6vw, 72px);
+  line-height: 1;
+  color: var(--accent);
+}
+.eis__text { color: var(--muted); font-size: 15px; }
+.eis__text strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: clamp(18px, 1.8vw, 21px);
+  font-weight: 500;
+  color: var(--ink);
+}
+.eis__note { margin: 20px 0 0; font-size: 12px; color: var(--muted); }
+.eis__note a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.eis__seal { display: grid; place-items: center; }
+.eis__seal svg {
+  width: 100%;
+  max-width: 400px;
+  filter: drop-shadow(0 30px 60px rgba(201, 164, 106, 0.18));
+}
+.seal__outer { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+.seal__line { fill: none; stroke: rgba(201, 164, 106, 0.45); stroke-width: 1; }
+.seal__ring { fill: var(--accent); font-family: var(--sans); font-size: 14px; font-weight: 600; letter-spacing: 0.22em; }
+.seal__mark { fill: var(--cream); font-family: var(--serif); font-size: 84px; letter-spacing: 0.04em; }
+.seal__sub { fill: var(--muted); font-family: var(--sans); font-size: 10px; font-weight: 500; letter-spacing: 0.3em; }
+
 /* ---------- CTA ---------- */
 .cta { padding: clamp(110px, 16vw, 200px) 0; text-align: center; }
 .cta__inner { display: flex; flex-direction: column; align-items: center; gap: 44px; }
@@ -803,6 +849,11 @@ em { font-style: italic; color: var(--accent); }
   .scenes__grid { grid-template-columns: 1fr; }
   .talent__head { align-items: flex-start; flex-direction: column; }
   .talent__card { flex-basis: 72vw; }
+  .eis__inner { grid-template-columns: 1fr; }
+  .eis__seal { order: -1; }
+  .eis__seal svg { max-width: 220px; }
+  .eis__item { align-items: flex-start; }
+  .eis__figure { flex-basis: 84px; font-size: 44px; }
   .scene, .scene--wide { aspect-ratio: 4 / 3; }
   .nav__links { display: none; }
   .logo__text { font-size: 14px; }
@@ -1052,6 +1103,49 @@ em { font-style: italic; color: var(--accent); }
             </div>
           </li>
         </ol>
+      </div>
+    </section>
+
+    <!-- EIS benefits -->
+    <section class="eis" aria-labelledby="eis-title">
+      <div class="container eis__inner">
+        <div class="eis__content">
+          <div class="reveal">
+            <p class="eyebrow">Enterprise Investment Scheme</p>
+            <h2 class="section-title" id="eis-title">Why invest in an EIS<br><em>qualifying company?</em></h2>
+          </div>
+          <ul class="eis__list">
+            <li class="eis__item reveal">
+              <span class="eis__figure">30%</span>
+              <span class="eis__text"><strong>Income Tax Relief</strong>On the amount you invest, claimed against your Income Tax bill.</span>
+            </li>
+            <li class="eis__item reveal">
+              <span class="eis__figure">0%</span>
+              <span class="eis__text"><strong>Capital Gains Tax exemption after 3 years</strong>Gains on qualifying shares held for at least three years are free of Capital Gains Tax.</span>
+            </li>
+            <li class="eis__item reveal">
+              <span class="eis__figure">45%</span>
+              <span class="eis__text"><strong>Up to 45% Loss Relief</strong>If an investment fails, losses can be set against your income at your highest tax rate.</span>
+            </li>
+          </ul>
+          <p class="eis__note reveal">Reliefs depend on your individual circumstances and on the company keeping its EIS status. <a href="#tax-note">See tax note*</a></p>
+        </div>
+
+        <div class="eis__seal reveal" aria-hidden="true">
+          <svg viewBox="0 0 320 320">
+            <defs>
+              <path id="seal-top" d="M160,160 m-122,0 a122,122 0 1,1 244,0"/>
+              <path id="seal-bottom" d="M38,160 a122,122 0 0,0 244,0"/>
+            </defs>
+            <circle cx="160" cy="160" r="156" class="seal__outer"/>
+            <circle cx="160" cy="160" r="142" class="seal__line"/>
+            <circle cx="160" cy="160" r="100" class="seal__line"/>
+            <text class="seal__ring"><textPath href="#seal-top" startOffset="50%" text-anchor="middle">ENTERPRISE INVESTMENT SCHEME</textPath></text>
+            <text class="seal__ring"><textPath href="#seal-bottom" startOffset="50%" text-anchor="middle">&#10022; QUALIFYING COMPANIES &#10022;</textPath></text>
+            <text x="160" y="178" text-anchor="middle" class="seal__mark">EIS</text>
+            <text x="160" y="212" text-anchor="middle" class="seal__sub">TAX EFFICIENT</text>
+          </svg>
+        </div>
       </div>
     </section>
 
