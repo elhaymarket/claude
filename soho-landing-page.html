@@ -299,20 +299,6 @@ em { font-style: italic; color: var(--accent); }
   transition: transform 0.5s var(--ease);
 }
 .roi:hover .roi__circle { transform: scale(1.04); }
-.roi__ring {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  animation: spin 24s linear infinite;
-}
-.roi__ring text {
-  fill: var(--accent);
-  font-family: var(--sans);
-  font-size: 11px;
-  font-weight: 600;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
 .roi__value {
   font-family: var(--serif);
   font-size: 54px;
@@ -327,7 +313,16 @@ em { font-style: italic; color: var(--accent); }
   text-transform: uppercase;
   color: var(--accent);
 }
-.roi__caveat { font-size: 12px; color: var(--muted); }
+.roi__caveat {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  text-decoration: underline;
+  text-decoration-color: rgba(201, 164, 106, 0.6);
+  text-underline-offset: 3px;
+  transition: color 0.3s;
+}
+.roi:hover .roi__caveat { color: var(--ink); }
 .roi:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 12px; }
 #roi-note { margin-top: 12px; scroll-margin-top: 140px; }
 .hero__note { font-size: 14px; color: var(--muted); }
@@ -789,17 +784,15 @@ em { font-style: italic; color: var(--accent); }
   .promo__cta { display: none; }
   .roi {
     position: static;
-    flex-direction: row-reverse;
-    gap: 14px;
+    gap: 8px;
     width: max-content;
     max-width: 100%;
     margin: 28px 0 0 auto;
   }
   .roi__circle { width: 120px; height: 120px; flex-shrink: 0; box-shadow: 0 0 0 5px rgba(12, 11, 10, 0.35); }
-  .roi__ring text { font-size: 12.5px; letter-spacing: 0.1em; }
   .roi__value { font-size: 34px; }
   .roi__label { font-size: 9px; letter-spacing: 0.1em; }
-  .roi__caveat { max-width: 120px; font-size: 12px; line-height: 1.4; text-align: right; }
+  .roi__caveat { font-size: 11px; }
   .hero__media {
     width: 100%;
     bottom: 35%;
@@ -887,14 +880,10 @@ em { font-style: italic; color: var(--accent); }
         <!-- Projected return badge -->
         <a class="roi" href="#roi-note" aria-label="217% projected return on investment. Projected, not guaranteed. Capital at risk. See note.">
           <span class="roi__circle" aria-hidden="true">
-            <svg class="roi__ring" viewBox="0 0 200 200">
-              <defs><path id="roi-path" d="M100,100 m-82,0 a82,82 0 1,1 164,0 a82,82 0 1,1 -164,0"/></defs>
-              <text><textPath href="#roi-path" textLength="508" lengthAdjust="spacing">PROJECTED &#183; NOT GUARANTEED &#183; CAPITAL AT RISK &#183;</textPath></text>
-            </svg>
             <span class="roi__value">217%</span>
             <span class="roi__label">Projected ROI**</span>
           </span>
-          <span class="roi__caveat" aria-hidden="true">Not guaranteed. Capital at risk.</span>
+          <span class="roi__caveat" aria-hidden="true">Projected &middot; Not guaranteed &middot; Capital at risk</span>
         </a>
       </div>
 
