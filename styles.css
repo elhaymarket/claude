@@ -772,6 +772,49 @@ em { font-style: italic; color: var(--accent); }
 }
 .quiz__result-text { margin: 0 0 32px; color: var(--muted); }
 
+.quiz__result-intro { margin: 0 0 8px; color: var(--muted); }
+
+/* ---------- Avenue choice ---------- */
+.choice { margin: 0 0 12px; padding: 0; border: 0; display: grid; gap: 10px; }
+.choice legend { padding: 0; margin-bottom: 12px; }
+.choice__opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+  transition: border-color 0.3s, background 0.3s;
+}
+.choice__opt:hover { border-color: rgba(201, 164, 106, 0.6); }
+.choice__opt:has(input:checked) { border-color: var(--accent); background: rgba(201, 164, 106, 0.1); }
+.choice__opt input { margin-top: 3px; accent-color: var(--accent); width: 17px; height: 17px; flex-shrink: 0; }
+.choice__opt strong { display: block; font-weight: 500; font-size: 15px; color: var(--ink); }
+.choice__others {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: -2px 0 2px 32px;
+}
+.choice__others label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.3s, background 0.3s;
+}
+.choice__others label:has(input:checked) { border-color: var(--accent); background: rgba(201, 164, 106, 0.08); }
+.choice__others input { accent-color: var(--accent); width: 16px; height: 16px; flex-shrink: 0; }
+
 /* ---------- Form ---------- */
 .form {
   display: grid;
@@ -849,6 +892,7 @@ em { font-style: italic; color: var(--accent); }
   .card { min-height: 0; }
   .card h3 { margin-top: 28px; }
   .form__row { grid-template-columns: 1fr; }
+  .choice__others { grid-template-columns: 1fr; margin-left: 0; }
   .quiz__top { padding: 16px 20px; }
 }
 @media (max-width: 420px) {

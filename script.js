@@ -122,6 +122,7 @@ const optionsEl = quiz.querySelector(".quiz__options");
 const backBtn = steps.question.querySelector(".quiz__back");
 const form = document.getElementById("lead-form");
 const formError = form.querySelector(".form__error");
+const othersEl = form.querySelector(".choice__others");
 
 let current = 0;
 let answers = [];
@@ -251,6 +252,20 @@ function showResult() {
   bar.style.width = "100%";
   steps.result.querySelector(".quiz__result-title").textContent = avenue.title;
   steps.result.querySelector(".quiz__result-text").textContent = avenue.text;
+  form.querySelector(".choice__match").textContent = avenue.title;
+
+  // Tick boxes for the other five avenues
+  othersEl.innerHTML = "";
+  Object.entries(AVENUES)
+    .filter(([key]) => key !== match)
+    .forEach(([key, a]) => {
+      const label = document.createElement("label");
+      label.innerHTML = `<input type="checkbox" name="otherAvenue" value="${key}"><span></span>`;
+      label.lastChild.textContent = a.title;
+      othersEl.appendChild(label);
+    });
+  form.querySelector('input[name="interest"][value="match"]').checked = true;
+  othersEl.hidden = true;
   showStep("result");
   quiz.querySelector(".quiz__panel").scrollTop = 0;
 }
@@ -268,6 +283,32 @@ function validate() {
 
 form.addEventListener("input", (e) => e.target.classList.remove("is-invalid"));
 
+// Show the other avenues only when "a different avenue" is chosen,
+// and choose that option automatically when one of them is ticked
+form.addEventListener("change", (e) => {
+  if (e.target.name === "interest") othersEl.hidden = e.target.value !== "other";
+  if (e.target.name === "otherAvenue" && e.target.checked) {
+    form.querySelector('input[name="interest"][value="other"]').checked = true;
+  }
+});
+
+// "A, B and C"
+const listWithAnd = (items) =>
+  items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}` : items[0];
+
+// Works out what the person asked for information on
+function chosenInterest() {
+  const interest = form.querySelector('input[name="interest"]:checked').value;
+  if (interest === "all") {
+    return { interest, label: "Open to all avenues (would like to talk through all options)" };
+  }
+  if (interest === "other") {
+    const picked = [...othersEl.querySelectorAll("input:checked")].map((i) => AVENUES[i.value].title);
+    return { interest, label: picked.join(", "), picked };
+  }
+  return { interest, label: AVENUES[match].title };
+}
+
 // Sends a lead to HubSpot's Forms API (no login or API key needed)
 async function sendToHubSpot(payload) {
   const hs = CONFIG.hubspot;
@@ -280,7 +321,8 @@ async function sendToHubSpot(payload) {
   ];
   if (hs.avenueProperty) fields.push(field(hs.avenueProperty, payload.investmentAvenue));
   if (hs.answersProperty) {
-    const lines = payload.answers.map((a, i) => `Q${i + 1}. ${a.question}\nA: ${a.answer}`);
+    const lines = [`Suggested avenue: ${payload.suggestedAvenue}\nWants information on: ${payload.investmentAvenue}`];
+    payload.answers.forEach((a, i) => lines.push(`Q${i + 1}. ${a.question}\nA: ${a.answer}`));
     const utm = ["utm_source", "utm_medium", "utm_campaign"]
       .filter((k) => payload[k])
       .map((k) => `${k}: ${payload[k]}`);
@@ -311,6 +353,13 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   formError.hidden = true;
 
+  const choice = chosenInterest();
+  if (choice.interest === "other" && !choice.picked.length) {
+    formError.textContent = "Please tick at least one avenue, or choose another option.";
+    formError.hidden = false;
+    return;
+  }
+
   if (!validate()) {
     formError.textContent = "Please fill in every field and tick the box to continue.";
     formError.hidden = false;
@@ -325,7 +374,9 @@ form.addEventListener("submit", async (e) => {
     email: data.email.trim(),
     phone: data.phone.trim(),
     consent: true,
-    investmentAvenue: AVENUES[match].title,
+    investmentAvenue: choice.label,
+    suggestedAvenue: AVENUES[match].title,
+    interest: choice.interest,
     answers: answers.map((a, i) => ({
       question: QUESTIONS[i].q,
       answer: QUESTIONS[i].options[a].label,
@@ -355,7 +406,9 @@ form.addEventListener("submit", async (e) => {
       console.info("No HubSpot form or formEndpoint set. Submission:", payload);
     }
     steps.thanks.querySelector(".quiz__thanks-text").textContent =
-      `Thanks, ${payload.firstName}. We'll send information on ${AVENUES[match].title} to ${payload.email} shortly.`;
+      choice.interest === "all"
+        ? `Thanks, ${payload.firstName}. One of our team will be in touch at ${payload.email} to talk you through all the options.`
+        : `Thanks, ${payload.firstName}. We'll send information on ${listWithAnd(choice.picked || [payload.investmentAvenue])} to ${payload.email} shortly.`;
     showStep("thanks");
   } catch (err) {
     formError.textContent = "Sorry, something went wrong. Please try again in a moment.";

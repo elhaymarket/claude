@@ -344,10 +344,28 @@
         <!-- Result + details form -->
         <div class="quiz__step" data-step="result" hidden>
           <p class="eyebrow">Your match</p>
+          <p class="quiz__result-intro">We think this is the best fit for your interests:</p>
           <h2 class="quiz__result-title"></h2>
           <p class="quiz__result-text"></p>
 
           <form class="form" id="lead-form" novalidate>
+            <fieldset class="choice">
+              <legend class="form__intro">Which would you like information on?</legend>
+              <label class="choice__opt">
+                <input type="radio" name="interest" value="match" checked>
+                <span><strong>Our suggestion: <span class="choice__match"></span></strong></span>
+              </label>
+              <label class="choice__opt">
+                <input type="radio" name="interest" value="other">
+                <span><strong>I'd prefer a different avenue</strong>Tick as many as you like.</span>
+              </label>
+              <div class="choice__others" hidden></div>
+              <label class="choice__opt">
+                <input type="radio" name="interest" value="all">
+                <span><strong>I'm open to everything</strong>Actually I'm open to all avenues of the British film and TV industry. I'd like to talk to someone about all the options.</span>
+              </label>
+            </fieldset>
+
             <p class="form__intro">Where should we send your information?</p>
             <div class="form__row">
               <label class="field">
