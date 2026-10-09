@@ -3,12 +3,27 @@
    ========================================================== */
 
 /* ---------- Settings ----------
-   formEndpoint: where completed forms are sent (as JSON, POST).
-   Works out of the box with services such as Formspree
-   (https://formspree.io) or your own CRM webhook.
-   Leave it empty while testing: submissions are logged to the
-   browser console and the thank-you screen still shows. */
+   HubSpot: fill in portalId and formGuid and every completed
+   questionnaire is sent straight to that HubSpot form, creating
+   or updating a contact. Both IDs are shown in the form's
+   embed code in HubSpot (see README.md for the steps).
+
+   The two custom properties must exist in HubSpot and be added
+   to the form (they can be hidden fields). Set either name to ""
+   to stop sending it.
+
+   formEndpoint: optional extra address that receives a JSON copy
+   of each lead (e.g. Formspree or another webhook).
+
+   With nothing filled in, the thank-you screen still shows but
+   the details only go to the browser console. */
 const CONFIG = {
+  hubspot: {
+    portalId: "",
+    formGuid: "",
+    avenueProperty: "investment_avenue",
+    answersProperty: "questionnaire_answers",
+  },
   formEndpoint: "",
 };
 
@@ -253,6 +268,45 @@ function validate() {
 
 form.addEventListener("input", (e) => e.target.classList.remove("is-invalid"));
 
+// Sends a lead to HubSpot's Forms API (no login or API key needed)
+async function sendToHubSpot(payload) {
+  const hs = CONFIG.hubspot;
+  const field = (name, value) => ({ objectTypeId: "0-1", name, value });
+  const fields = [
+    field("firstname", payload.firstName),
+    field("lastname", payload.lastName),
+    field("email", payload.email),
+    field("phone", payload.phone),
+  ];
+  if (hs.avenueProperty) fields.push(field(hs.avenueProperty, payload.investmentAvenue));
+  if (hs.answersProperty) {
+    const lines = payload.answers.map((a, i) => `Q${i + 1}. ${a.question}\nA: ${a.answer}`);
+    const utm = ["utm_source", "utm_medium", "utm_campaign"]
+      .filter((k) => payload[k])
+      .map((k) => `${k}: ${payload[k]}`);
+    if (utm.length) lines.push(utm.join("\n"));
+    fields.push(field(hs.answersProperty, lines.join("\n\n")));
+  }
+
+  // Links the lead to their website visits if the HubSpot tracking code is on the page
+  const hutk = (document.cookie.match(/(?:^|;\s*)hubspotutk=([^;]+)/) || [])[1];
+  const context = { pageUri: location.href, pageName: document.title };
+  if (hutk) context.hutk = hutk;
+
+  const res = await fetch(
+    `https://api.hsforms.com/submissions/v3/integration/submit/${encodeURIComponent(hs.portalId)}/${encodeURIComponent(hs.formGuid)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields, context }),
+    }
+  );
+  if (!res.ok) {
+    console.error("HubSpot rejected the submission:", res.status, await res.text().catch(() => ""));
+    throw new Error(`HubSpot status ${res.status}`);
+  }
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   formError.hidden = true;
@@ -287,6 +341,8 @@ form.addEventListener("submit", async (e) => {
   submitBtn.textContent = "Sending…";
 
   try {
+    const hs = CONFIG.hubspot;
+    if (hs.portalId && hs.formGuid) await sendToHubSpot(payload);
     if (CONFIG.formEndpoint) {
       const res = await fetch(CONFIG.formEndpoint, {
         method: "POST",
@@ -294,8 +350,9 @@ form.addEventListener("submit", async (e) => {
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error(`Status ${res.status}`);
-    } else {
-      console.info("No formEndpoint set in script.js. Submission:", payload);
+    }
+    if (!(hs.portalId && hs.formGuid) && !CONFIG.formEndpoint) {
+      console.info("No HubSpot form or formEndpoint set. Submission:", payload);
     }
     steps.thanks.querySelector(".quiz__thanks-text").textContent =
       `Thanks, ${payload.firstName}. We'll send information on ${AVENUES[match].title} to ${payload.email} shortly.`;
