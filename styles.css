@@ -257,6 +257,66 @@ em { font-style: italic; color: var(--accent); }
   color: var(--muted);
 }
 .hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
+
+/* Projected return badge */
+.roi {
+  position: absolute;
+  right: var(--gutter);
+  bottom: clamp(56px, 8vw, 96px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.roi__circle {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, rgba(227, 196, 141, 0.28), rgba(12, 11, 10, 0.82) 70%);
+  border: 1px solid rgba(201, 164, 106, 0.7);
+  box-shadow: 0 0 0 8px rgba(12, 11, 10, 0.35), 0 20px 60px -20px rgba(201, 164, 106, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: transform 0.5s var(--ease);
+}
+.roi:hover .roi__circle { transform: scale(1.04); }
+.roi__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  animation: spin 24s linear infinite;
+}
+.roi__ring text {
+  fill: var(--accent);
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.roi__value {
+  font-family: var(--serif);
+  font-size: 54px;
+  line-height: 1;
+  color: var(--cream);
+}
+.roi__label {
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.roi__caveat { font-size: 12px; color: var(--muted); }
+.roi:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; border-radius: 12px; }
+#roi-note { margin-top: 12px; scroll-margin-top: 140px; }
 .hero__note { font-size: 14px; color: var(--muted); }
 
 /* ---------- Marquee ---------- */
@@ -714,6 +774,19 @@ em { font-style: italic; color: var(--accent); }
   .promo__inner { gap: 10px; justify-content: space-between; text-align: left; }
   .promo__text { font-size: 13px; }
   .promo__cta { display: none; }
+  .roi {
+    position: static;
+    flex-direction: row-reverse;
+    gap: 14px;
+    width: max-content;
+    max-width: 100%;
+    margin: 28px 0 0 auto;
+  }
+  .roi__circle { width: 120px; height: 120px; flex-shrink: 0; box-shadow: 0 0 0 5px rgba(12, 11, 10, 0.35); }
+  .roi__ring text { font-size: 12.5px; letter-spacing: 0.1em; }
+  .roi__value { font-size: 34px; }
+  .roi__label { font-size: 9px; letter-spacing: 0.1em; }
+  .roi__caveat { max-width: 120px; font-size: 12px; line-height: 1.4; text-align: right; }
   .hero__media {
     width: 100%;
     bottom: 35%;
