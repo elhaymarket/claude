@@ -439,6 +439,52 @@ em { font-style: italic; color: var(--accent); }
 }
 .card p { margin: 0; color: var(--muted); font-size: 15px; }
 
+/* ---------- VIP Investors Club ---------- */
+.vip { padding: 0 0 clamp(96px, 14vw, 180px); }
+.vip__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+}
+.vip__media { position: relative; padding: 0 12% 18% 0; }
+.vip__photo { margin: 0; border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.vip__photo img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); display: block; }
+.vip__photo--main { aspect-ratio: 4 / 5; }
+.vip__photo--main img { object-position: 46% 30%; }
+.vip__photo--inset {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 62%;
+  aspect-ratio: 16 / 10;
+  border: 6px solid var(--bg);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+}
+.vip .section-title { font-size: clamp(36px, 4.6vw, 60px); }
+.vip__list { list-style: none; margin: clamp(32px, 4vw, 48px) 0 0; padding: 0; }
+.vip__item {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+  font-size: 16px;
+  color: var(--ink);
+}
+.vip__item:last-child { border-bottom: 1px solid var(--line); }
+.vip__icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(201, 164, 106, 0.6);
+  border-radius: 50%;
+  color: var(--accent);
+}
+.vip__item > span:last-child { padding-top: 6px; }
+
 /* ---------- Process ---------- */
 .process {
   padding: clamp(96px, 14vw, 180px) 0;
@@ -881,6 +927,8 @@ em { font-style: italic; color: var(--accent); }
   .talent__head { align-items: flex-start; flex-direction: column; }
   .talent__card { flex-basis: 72vw; }
   .eis__inner { grid-template-columns: 1fr; }
+  .vip__inner { grid-template-columns: 1fr; }
+  .vip__media { padding: 0 8% 22% 0; }
   .eis__seal { order: -1; }
   .eis__seal svg { max-width: 220px; }
   .eis__item { align-items: flex-start; }
