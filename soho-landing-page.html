@@ -125,10 +125,68 @@ em { font-style: italic; color: var(--accent); }
 .logo__mark--small { width: 30px; height: 30px; font-size: 17px; }
 .logo__text { font-size: 15px; font-weight: 500; letter-spacing: 0.02em; }
 
+/* ---------- Tax relief banner ---------- */
+.promo {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  overflow: hidden;
+  background: linear-gradient(100deg, #b8904f 0%, #e3c48d 45%, #c9a46a 70%, #b8904f 100%);
+  color: var(--accent-ink);
+}
+.promo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: shimmer 5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes shimmer { 0%, 55% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.promo__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 46px;
+  padding: 8px var(--gutter);
+  text-align: center;
+}
+.promo__badge {
+  flex-shrink: 0;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--accent-ink);
+  color: #e3c48d;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+}
+.promo__text { margin: 0; font-size: 14px; font-weight: 500; line-height: 1.35; }
+.promo__text strong { font-weight: 700; letter-spacing: 0.01em; }
+.promo__star { margin-left: 1px; font-weight: 700; text-decoration: none; }
+.promo__cta {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1px solid rgba(12, 11, 10, 0.5);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-ink);
+  transition: background 0.3s, color 0.3s;
+}
+.promo__cta:hover { background: var(--accent-ink); color: #e3c48d; }
+.promo__cta:focus-visible, .promo__star:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+#tax-note { margin-top: 12px; scroll-margin-top: 140px; }
+
 /* ---------- Nav ---------- */
 .nav {
   position: fixed;
-  inset: 0 0 auto 0;
+  inset: var(--banner-h, 46px) 0 auto 0;
   z-index: 50;
   padding: 18px 0;
   transition: background 0.4s, backdrop-filter 0.4s, border-color 0.4s;
@@ -153,7 +211,7 @@ em { font-style: italic; color: var(--accent); }
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding-top: 140px;
+  padding-top: calc(140px + var(--banner-h, 46px));
   overflow: hidden;
 }
 .hero__media {
@@ -666,6 +724,9 @@ em { font-style: italic; color: var(--accent); }
   .process__inner { grid-template-columns: 1fr; }
 }
 @media (max-width: 720px) {
+  .promo__inner { gap: 10px; justify-content: space-between; text-align: left; }
+  .promo__text { font-size: 13px; }
+  .promo__cta { display: none; }
   .hero__media {
     width: 100%;
     bottom: 35%;
@@ -698,6 +759,15 @@ em { font-style: italic; color: var(--accent); }
   </style>
 </head>
 <body>
+
+  <!-- Tax relief banner -->
+  <div class="promo" role="region" aria-label="Tax relief">
+    <div class="promo__inner">
+      <span class="promo__badge">EIS</span>
+      <p class="promo__text">HMRC EIS qualifying investment with <strong>30% Income Tax Relief</strong><a href="#tax-note" class="promo__star" aria-label="See tax note">*</a></p>
+      <button class="promo__cta" type="button" data-open-quiz>Find your avenue <span aria-hidden="true">&rarr;</span></button>
+    </div>
+  </div>
 
   <!-- Navigation -->
   <header class="nav" id="top">
@@ -933,6 +1003,7 @@ em { font-style: italic; color: var(--accent); }
       </div>
       <div class="footer__risk">
         <p><strong>Capital at risk.</strong> Investments in film and television are high risk. You could lose all of the money you invest, and you should not expect to be protected if something goes wrong. These investments may be difficult to sell, and past performance is not a reliable indicator of future results. Nothing on this website is personal advice. If you are unsure whether an investment is right for you, seek independent financial advice.</p>
+        <p id="tax-note"><strong>*Tax relief.</strong> Enterprise Investment Scheme (EIS) Income Tax Relief of 30% is available only on investments in companies that meet HMRC's EIS rules, and only if those rules continue to be met. Relief depends on your individual circumstances, may be withdrawn if the company or investor stops qualifying, and tax rules can change. Shares must normally be held for at least three years to keep the relief. Please speak to a tax adviser.</p>
       </div>
       <p class="footer__legal">&copy; <span id="year"></span> Soho Investment Group. All rights reserved.</p>
     </div>
@@ -1377,6 +1448,16 @@ form.addEventListener("submit", async (e) => {
 
 /* ---------- Page details ---------- */
 document.getElementById("year").textContent = new Date().getFullYear();
+
+// Keep the menu bar just below the tax relief banner, whatever its height
+const promo = document.querySelector(".promo");
+if (promo) {
+  const setBannerHeight = () =>
+    document.documentElement.style.setProperty("--banner-h", `${promo.offsetHeight}px`);
+  setBannerHeight();
+  if ("ResizeObserver" in window) new ResizeObserver(setBannerHeight).observe(promo);
+  else window.addEventListener("resize", setBannerHeight);
+}
 
 // Nav background once the page scrolls
 const nav = document.querySelector(".nav");

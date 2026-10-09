@@ -369,6 +369,16 @@ form.addEventListener("submit", async (e) => {
 /* ---------- Page details ---------- */
 document.getElementById("year").textContent = new Date().getFullYear();
 
+// Keep the menu bar just below the tax relief banner, whatever its height
+const promo = document.querySelector(".promo");
+if (promo) {
+  const setBannerHeight = () =>
+    document.documentElement.style.setProperty("--banner-h", `${promo.offsetHeight}px`);
+  setBannerHeight();
+  if ("ResizeObserver" in window) new ResizeObserver(setBannerHeight).observe(promo);
+  else window.addEventListener("resize", setBannerHeight);
+}
+
 // Nav background once the page scrolls
 const nav = document.querySelector(".nav");
 const onScroll = () => nav.classList.toggle("is-scrolled", window.scrollY > 20);
