@@ -19,8 +19,9 @@
    the details only go to the browser console. */
 const CONFIG = {
   hubspot: {
-    portalId: "",
-    formGuid: "",
+    portalId: "27183426",
+    formGuid: "a86a48d0-3665-47de-8d4b-2a36f11f43e8",
+    region: "eu1", // from the HubSpot embed code (data-region)
     avenueProperty: "investment_avenue",
     answersProperty: "questionnaire_answers",
   },
@@ -335,14 +336,23 @@ async function sendToHubSpot(payload) {
   const context = { pageUri: location.href, pageName: document.title };
   if (hutk) context.hutk = hutk;
 
-  const res = await fetch(
-    `https://api.hsforms.com/submissions/v3/integration/submit/${encodeURIComponent(hs.portalId)}/${encodeURIComponent(hs.formGuid)}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fields, context }),
+  // Try the account's regional address first, then HubSpot's main address
+  const hosts = hs.region ? [`api-${hs.region}.hsforms.com`, "api.hsforms.com"] : ["api.hsforms.com"];
+  const path = `/submissions/v3/integration/submit/${encodeURIComponent(hs.portalId)}/${encodeURIComponent(hs.formGuid)}`;
+  let res;
+  for (const host of hosts) {
+    try {
+      res = await fetch(`https://${host}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fields, context }),
+      });
+      break;
+    } catch (err) {
+      console.warn(`Could not reach ${host}, trying the next address`, err);
     }
-  );
+  }
+  if (!res) throw new Error("Could not reach HubSpot");
   if (!res.ok) {
     console.error("HubSpot rejected the submission:", res.status, await res.text().catch(() => ""));
     throw new Error(`HubSpot status ${res.status}`);
