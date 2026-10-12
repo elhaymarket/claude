@@ -247,8 +247,11 @@ function score() {
   return tied[0];
 }
 
+let resultShownAt = 0;
+
 function showResult() {
   match = score();
+  resultShownAt = Date.now();
   const avenue = AVENUES[match];
   bar.style.width = "100%";
   steps.result.querySelector(".quiz__result-title").textContent = avenue.title;
@@ -362,6 +365,15 @@ async function sendToHubSpot(payload) {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   formError.hidden = true;
+
+  // Spam trap: bots fill the hidden field or submit inhumanly fast.
+  // Show the thank-you screen as normal but send nothing.
+  const trap = form.querySelector('input[name="hp_check"]');
+  if ((trap && trap.value) || Date.now() - resultShownAt < 1500) {
+    steps.thanks.querySelector(".quiz__thanks-text").textContent = "Thanks. We'll be in touch shortly.";
+    showStep("thanks");
+    return;
+  }
 
   const choice = chosenInterest();
   if (choice.interest === "other" && !choice.picked.length) {
