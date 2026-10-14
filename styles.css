@@ -168,7 +168,7 @@ em { font-style: italic; color: var(--accent); }
 }
 .promo__cta:hover { background: var(--accent-ink); color: #e3c48d; }
 .promo__cta:focus-visible, .promo__star:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
-#tax-note { margin-top: 12px; scroll-margin-top: 140px; }
+
 
 /* ---------- Nav ---------- */
 .nav {
@@ -750,6 +750,33 @@ em { font-style: italic; color: var(--accent); }
 }
 .footer__risk p { margin: 0; }
 .footer__risk strong { color: var(--ink); font-weight: 500; }
+/* Important information / disclaimers */
+.disclaimer { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--line); }
+.disclaimer__title {
+  margin: 0 0 24px;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(26px, 3vw, 34px);
+  color: var(--ink);
+}
+.disclaimer__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px clamp(28px, 4vw, 56px);
+}
+.disclaimer__block { scroll-margin-top: 140px; }
+.disclaimer__block h3 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.disclaimer__block p { margin: 0 0 10px; font-size: 13px; line-height: 1.7; color: var(--muted); }
+.disclaimer__block p:last-child { margin-bottom: 0; }
+@media (max-width: 720px) { .disclaimer__grid { grid-template-columns: 1fr; } }
+
 .footer__legal { margin: 28px 0 0; font-size: 13px; color: var(--muted); }
 
 /* ---------- Reveal on scroll ----------
