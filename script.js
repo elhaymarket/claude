@@ -325,7 +325,7 @@ async function sendToHubSpot(payload) {
   ];
   if (hs.avenueProperty) fields.push(field(hs.avenueProperty, payload.investmentAvenue));
   if (hs.answersProperty) {
-    const lines = [`Suggested avenue: ${payload.suggestedAvenue}\nWants information on: ${payload.investmentAvenue}`];
+    const lines = [`Interest area from questionnaire: ${payload.suggestedAvenue}\nWants information on: ${payload.investmentAvenue}`];
     payload.answers.forEach((a, i) => lines.push(`Q${i + 1}. ${a.question}\nA: ${a.answer}`));
     const utm = ["utm_source", "utm_medium", "utm_campaign"]
       .filter((k) => payload[k])
