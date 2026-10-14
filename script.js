@@ -1,5 +1,5 @@
 /* ==========================================================
-   Soho Investment Group: landing page + questionnaire
+   Datamine Promotions: landing page + questionnaire
    ========================================================== */
 
 /* ---------- Settings ----------
