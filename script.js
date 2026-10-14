@@ -32,27 +32,27 @@ const CONFIG = {
 const AVENUES = {
   pre: {
     title: "Pre-Production Investment",
-    text: "You're drawn to the very beginning of a project: development, scripts, casting and planning. Pre-production is where films and series are shaped before a camera turns, and we'll send you information on current opportunities at this stage.",
+    text: "You're drawn to the very beginning of a project: development, scripts, casting and planning. Pre-production is where films and series are shaped before a camera turns, and with your consent we'll pass your details to a company working at this stage, who will be in touch.",
   },
   production: {
     title: "Production Investment",
-    text: "You want to be close to the action. Production covers studios, crews and shoots, where the story is captured on set and on location. We'll send you information on current production opportunities.",
+    text: "You want to be close to the action. Production covers studios, crews and shoots, where the story is captured on set and on location. With your consent, we'll pass your details to a company working in production, who will be in touch.",
   },
   post: {
     title: "Post-Production Investment",
-    text: "You're interested in the craft that turns raw footage into a finished film or series: editing, colour grading, sound and visual effects. We'll send you information on current post-production opportunities.",
+    text: "You're interested in the craft that turns raw footage into a finished film or series: editing, colour grading, sound and visual effects. With your consent, we'll pass your details to a company working in post-production, who will be in touch.",
   },
   av: {
     title: "Audio Visual Investment",
-    text: "Technology and innovation appeal to you. Audio visual centres on home cinemas and the latest screening equipment: premium projection, screens and sound systems that bring the big-screen experience into homes and private venues. We'll send you information on current audio visual opportunities.",
+    text: "Technology and innovation appeal to you. Audio visual centres on home cinemas and the latest screening equipment: premium projection, screens and sound systems that bring the big-screen experience into homes and private venues. With your consent, we'll pass your details to a company working in audio visual, who will be in touch.",
   },
   hmu: {
     title: "Hair and Make-Up Investment",
-    text: "You appreciate the specialist talent behind the look of a production: hair, make-up and prosthetics for film and TV. We'll send you information on current hair and make-up opportunities.",
+    text: "You appreciate the specialist talent behind the look of a production: hair, make-up and prosthetics for film and TV. With your consent, we'll pass your details to a company working in hair and make-up, who will be in touch.",
   },
   festival: {
     title: "Film Festival Investment",
-    text: "Premieres, screenings and the festival circuit are where films meet audiences, buyers and distributors. We'll send you information on current film festival opportunities.",
+    text: "Premieres, screenings and the festival circuit are where films meet audiences, buyers and distributors. With your consent, we'll pass your details to a company working in film festival, who will be in touch.",
   },
 };
 
@@ -370,7 +370,7 @@ form.addEventListener("submit", async (e) => {
   // Show the thank-you screen as normal but send nothing.
   const trap = form.querySelector('input[name="hp_check"]');
   if ((trap && trap.value) || Date.now() - resultShownAt < 1500) {
-    steps.thanks.querySelector(".quiz__thanks-text").textContent = "Thanks. We'll be in touch shortly.";
+    steps.thanks.querySelector(".quiz__thanks-text").textContent = "Thank you. Your details have been received.";
     showStep("thanks");
     return;
   }
@@ -429,15 +429,15 @@ form.addEventListener("submit", async (e) => {
     }
     steps.thanks.querySelector(".quiz__thanks-text").textContent =
       choice.interest === "all"
-        ? `Thanks, ${payload.firstName}. One of our team will be in touch at ${payload.email} to talk you through all the options.`
-        : `Thanks, ${payload.firstName}. We'll send information on ${listWithAnd(choice.picked || [payload.investmentAvenue])} to ${payload.email} shortly.`;
+        ? `Thanks, ${payload.firstName}. We'll pass your details to companies across the British film and TV industry, and they'll be in touch at ${payload.email} or by phone to talk you through the options.`
+        : `Thanks, ${payload.firstName}. We'll pass your details to ${choice.picked && choice.picked.length > 1 ? "companies" : "a company"} working in ${listWithAnd((choice.picked || [payload.investmentAvenue]).map((t) => t.replace(/ Investment$/, "")))}, and they'll be in touch at ${payload.email} or by phone.`;
     showStep("thanks");
   } catch (err) {
     formError.textContent = "Sorry, something went wrong. Please try again in a moment.";
     formError.hidden = false;
   } finally {
     submitBtn.disabled = false;
-    submitBtn.textContent = "Send me the information";
+    submitBtn.textContent = "Submit my details";
   }
 });
 
