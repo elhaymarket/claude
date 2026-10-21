@@ -24,6 +24,10 @@ const CONFIG = {
     region: "eu1", // from the HubSpot embed code (data-region)
     avenueProperty: "investment_avenue",
     answersProperty: "questionnaire_answers",
+    // Lead source: the contact property's internal name, and the value sent with every lead.
+    // If HubSpot rejects this field, the lead is re-sent without it so it is never lost.
+    leadSourceProperty: "lead_source",
+    leadSourceValue: "Datamine Marketing Site",
   },
   formEndpoint: "",
 };
@@ -324,6 +328,7 @@ async function sendToHubSpot(payload) {
     field("phone", payload.phone),
   ];
   if (hs.avenueProperty) fields.push(field(hs.avenueProperty, payload.investmentAvenue));
+  if (hs.leadSourceProperty && hs.leadSourceValue) fields.push(field(hs.leadSourceProperty, hs.leadSourceValue));
   if (hs.answersProperty) {
     const lines = [`Interest area from questionnaire: ${payload.suggestedAvenue}\nWants information on: ${payload.investmentAvenue}`];
     payload.answers.forEach((a, i) => lines.push(`Q${i + 1}. ${a.question}\nA: ${a.answer}`));
@@ -342,20 +347,34 @@ async function sendToHubSpot(payload) {
   // Try the account's regional address first, then HubSpot's main address
   const hosts = hs.region ? [`api-${hs.region}.hsforms.com`, "api.hsforms.com"] : ["api.hsforms.com"];
   const path = `/submissions/v3/integration/submit/${encodeURIComponent(hs.portalId)}/${encodeURIComponent(hs.formGuid)}`;
-  let res;
-  for (const host of hosts) {
-    try {
-      res = await fetch(`https://${host}${path}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields, context }),
-      });
-      break;
-    } catch (err) {
-      console.warn(`Could not reach ${host}, trying the next address`, err);
+  const submit = async (sendFields) => {
+    for (const host of hosts) {
+      try {
+        return await fetch(`https://${host}${path}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fields: sendFields, context }),
+        });
+      } catch (err) {
+        console.warn(`Could not reach ${host}, trying the next address`, err);
+      }
+    }
+    return null;
+  };
+
+  let res = await submit(fields);
+  if (!res) throw new Error("Could not reach HubSpot");
+
+  // If HubSpot doesn't recognise the lead source field, send the lead again without it
+  if (!res.ok && hs.leadSourceProperty) {
+    const body = await res.clone().text().catch(() => "");
+    if (body.includes(hs.leadSourceProperty)) {
+      console.warn(`HubSpot rejected "${hs.leadSourceProperty}". Re-sending the lead without it.`, body);
+      res = await submit(fields.filter((f) => f.name !== hs.leadSourceProperty));
+      if (!res) throw new Error("Could not reach HubSpot");
     }
   }
-  if (!res) throw new Error("Could not reach HubSpot");
+
   if (!res.ok) {
     console.error("HubSpot rejected the submission:", res.status, await res.text().catch(() => ""));
     throw new Error(`HubSpot status ${res.status}`);

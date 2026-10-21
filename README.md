@@ -25,6 +25,8 @@ Each completed questionnaire can create or update a contact in HubSpot through H
 3. Publish the form, open its embed code and copy the `portalId` and `formId` values.
 4. Paste them into `CONFIG.hubspot` at the top of `script.js` (in the single-file version, the `<script>` section near the bottom): `portalId` and `formGuid`.
 
+Every lead also sets a **Lead source** contact property (internal name `lead_source`) to "Datamine Marketing Site". Add that property to the form as a hidden field. If HubSpot rejects it, the lead is re-sent without it so it is never lost. Change `leadSourceProperty` / `leadSourceValue` in `CONFIG.hubspot` if your property or value differs.
+
 Each lead arrives with their details, matched avenue, all five answers, and any `utm_source` / `utm_medium` / `utm_campaign` from the link. If you rename the properties, change `avenueProperty` and `answersProperty` to match, or set them to `""` to leave them out.
 
 `formEndpoint` can also be set to send a JSON copy of each lead to another service. With neither set, submissions are only logged to the browser console.
