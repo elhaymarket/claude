@@ -14,7 +14,22 @@ Open `index.html` in a browser, or run `python3 -m http.server` in this folder a
 
 Add `#quiz` (or `?quiz`) to the page URL, e.g. `https://yoursite.com/#quiz`, and the questionnaire opens as soon as the page loads. UTM parameters (`utm_source`, `utm_medium`, `utm_campaign`) are passed through with each submission.
 
-## Sending leads to HubSpot
+## Deploying (Netlify from GitHub)
+
+Leads are saved by a small server function (`netlify/functions/lead.js`) so that existing HubSpot contacts are never changed:
+
+- **New email address:** a new contact is created (with Investment avenue, Questionnaire answers and Lead source "Datamine Marketing Site") plus a note recording the enquiry and consent.
+- **Existing email address:** the contact's details are left exactly as they are; a note with the enquiry is added to it.
+
+Because of this function, the site must be deployed **from GitHub**, not by drag and drop:
+
+1. In HubSpot, create a private app with the scopes `crm.objects.contacts.read` and `crm.objects.contacts.write`, and copy its access token.
+2. In Netlify, choose *Add new site → Import an existing project → GitHub*, pick this repository and branch. Build settings are read from `netlify.toml`.
+3. In Netlify, add an environment variable `HUBSPOT_TOKEN` with the token, then redeploy.
+
+The direct-to-HubSpot form code in `script.js` is only used if `CONFIG.leadEndpoint` is emptied.
+
+## Sending leads to HubSpot (direct form, not used by default)
 
 Each completed questionnaire can create or update a contact in HubSpot through HubSpot's Forms API (no API key needed).
 

@@ -1592,6 +1592,13 @@ em { font-style: italic; color: var(--accent); }
    With nothing filled in, the thank-you screen still shows but
    the details only go to the browser console. */
 const CONFIG = {
+  // Leads go to the site's own lead function, which creates NEW HubSpot
+  // contacts only and adds a note to existing ones (never changing them).
+  // Requires the site to be deployed from GitHub with HUBSPOT_TOKEN set.
+  leadEndpoint: "/.netlify/functions/lead",
+
+  // Direct-to-HubSpot form sending (updates existing contacts). Only used
+  // when leadEndpoint is empty.
   hubspot: {
     portalId: "27183426",
     formGuid: "a86a48d0-3665-47de-8d4b-2a36f11f43e8",
@@ -1999,6 +2006,8 @@ form.addEventListener("submit", async (e) => {
     utm_source: params.get("utm_source") || "",
     utm_medium: params.get("utm_medium") || "",
     utm_campaign: params.get("utm_campaign") || "",
+    consentText: (form.querySelector(".check span") || {}).textContent || "",
+    pageUri: location.href,
     submittedAt: new Date().toISOString(),
   };
 
@@ -2008,7 +2017,19 @@ form.addEventListener("submit", async (e) => {
 
   try {
     const hs = CONFIG.hubspot;
-    if (hs.portalId && hs.formGuid) await sendToHubSpot(payload);
+    if (CONFIG.leadEndpoint) {
+      const res = await fetch(CONFIG.leadEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        console.error("Lead function error:", res.status, await res.text().catch(() => ""));
+        throw new Error(`Lead function status ${res.status}`);
+      }
+    } else if (hs.portalId && hs.formGuid) {
+      await sendToHubSpot(payload);
+    }
     if (CONFIG.formEndpoint) {
       const res = await fetch(CONFIG.formEndpoint, {
         method: "POST",
@@ -2017,7 +2038,7 @@ form.addEventListener("submit", async (e) => {
       });
       if (!res.ok) throw new Error(`Status ${res.status}`);
     }
-    if (!(hs.portalId && hs.formGuid) && !CONFIG.formEndpoint) {
+    if (!CONFIG.leadEndpoint && !(hs.portalId && hs.formGuid) && !CONFIG.formEndpoint) {
       console.info("No HubSpot form or formEndpoint set. Submission:", payload);
     }
     steps.thanks.querySelector(".quiz__thanks-text").textContent =

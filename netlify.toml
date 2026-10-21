@@ -1,0 +1,10 @@
+# Netlify settings, used when the site is deployed from GitHub.
+# Publishes only the landing page files, and runs the lead capture function.
+
+[build]
+  command = "rm -rf public && mkdir -p public && cp -r index.html privacy.html styles.css script.js images public/"
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
