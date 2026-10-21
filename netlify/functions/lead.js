@@ -35,11 +35,21 @@ const json = (statusCode, body) => ({
 
 const clean = (value, max = 500) => String(value == null ? "" : value).trim().slice(0, max);
 
+// Read the HubSpot token, ignoring stray spaces or quotes from copy and paste
+function getToken() {
+  // Accept the expected name, or a near miss (different capitals or a stray space in the name)
+  const key =
+    ["HUBSPOT_TOKEN", "HUBSPOT_ACCESS_TOKEN", "HUBSPOT_PRIVATE_APP_TOKEN"].find((k) => process.env[k]) ||
+    Object.keys(process.env).find((k) => /^hubspot[_ ]?(access[_ ]?|private[_ ]?app[_ ]?)?token$/i.test(k.trim()) && process.env[k]);
+  const raw = key ? process.env[key] : "";
+  return raw.trim().replace(/^["']|["']$/g, "");
+}
+
 async function hubspot(path, method, body) {
   const res = await fetch(`${HUBSPOT_API}${path}`, {
     method,
     headers: {
-      Authorization: `Bearer ${process.env.HUBSPOT_TOKEN}`,
+      Authorization: `Bearer ${getToken()}`,
       "Content-Type": "application/json",
     },
     body: body ? JSON.stringify(body) : undefined,
@@ -96,9 +106,12 @@ function escapeHtml(s) {
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") return json(405, { error: "Method not allowed" });
-  if (!process.env.HUBSPOT_TOKEN) {
-    console.error("HUBSPOT_TOKEN is not set in Netlify environment variables");
-    return json(500, { error: "Not configured" });
+  if (!getToken()) {
+    // Help diagnose set-up problems without revealing any values: list the
+    // names of HubSpot-related variables this function can see
+    const seen = Object.keys(process.env).filter((k) => /hub|spot/i.test(k));
+    console.error("HUBSPOT_TOKEN is not available to this function. Related variable names seen:", seen);
+    return json(500, { error: "Not configured", variablesSeen: seen, context: process.env.CONTEXT || null });
   }
   if ((event.body || "").length > 20000) return json(413, { error: "Too large" });
 
