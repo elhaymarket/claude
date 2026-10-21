@@ -784,6 +784,7 @@ em { font-style: italic; color: var(--accent); }
 }
 .disclaimer__block p { margin: 0 0 10px; font-size: 13px; line-height: 1.7; color: var(--muted); }
 .disclaimer__block p:last-child { margin-bottom: 0; }
+.disclaimer__block strong { font-weight: 500; color: var(--ink); }
 @media (max-width: 720px) { .disclaimer__grid { grid-template-columns: 1fr; } }
 
 .footer__legal { margin: 28px 0 0; font-size: 13px; color: var(--muted); }
