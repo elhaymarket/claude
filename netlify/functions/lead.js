@@ -179,6 +179,8 @@ exports.handler = async (event) => {
     return json(200, { ok: true, contact: "new" });
   } catch (err) {
     console.error("Lead capture failed:", err.message);
-    return json(502, { error: "Could not save lead" });
+    // Include HubSpot's status code (e.g. 401 bad token, 403 missing scope) to help diagnose
+    const m = String(err.message).match(/\((\d{3})\)/);
+    return json(502, { error: "Could not save lead", hubspotStatus: m ? Number(m[1]) : null, step: String(err.message).split(" ")[0] });
   }
 };
