@@ -4,17 +4,27 @@
    Receives a completed questionnaire from the landing page and
    records it in HubSpot WITHOUT changing existing contacts:
 
-   - New email address      -> creates a new contact
+   - New email address      -> submits the HubSpot form (falls back to
+                               creating the contact directly)
    - Existing email address -> leaves the contact's details exactly as
                                they are and adds a note with the enquiry
 
    Needs one environment variable in Netlify:
      HUBSPOT_TOKEN  = the access token of a HubSpot private app with the
-                      scopes crm.objects.contacts.read and
-                      crm.objects.contacts.write
+                      scopes crm.objects.contacts.read,
+                      crm.objects.contacts.write and forms
    ========================================================== */
 
 const HUBSPOT_API = "https://api.hubapi.com";
+
+// HubSpot form that NEW leads are submitted to, so they appear under the
+// form's Submissions and count towards its marketing campaign.
+// Set HUBSPOT_FORM_GUID to "" in Netlify to switch this off.
+const FORM = {
+  portalId: process.env.HUBSPOT_PORTAL_ID || "27183426",
+  formGuid: process.env.HUBSPOT_FORM_GUID !== undefined ? process.env.HUBSPOT_FORM_GUID : "a86a48d0-3665-47de-8d4b-2a36f11f43e8",
+  hosts: ["api-eu1.hsforms.com", "api.hsforms.com"],
+};
 
 // Contact properties set on NEW contacts only
 const PROPERTIES = {
@@ -100,6 +110,53 @@ async function createContact(properties) {
   return res;
 }
 
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
+// Submit a NEW lead to the HubSpot form (authenticated, so reCAPTCHA isn't needed)
+async function submitForm(properties, context) {
+  if (!FORM.formGuid) return { ok: false, skipped: true };
+  const send = async (props) => {
+    const body = {
+      fields: Object.entries(props).filter(([, v]) => v).map(([name, value]) => ({ objectTypeId: "0-1", name, value: String(value) })),
+      context,
+    };
+    for (const host of FORM.hosts) {
+      try {
+        const res = await fetch(`https://${host}/submissions/v3/integration/secure/submit/${FORM.portalId}/${FORM.formGuid}`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${getToken()}`, "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        return { ok: res.ok, status: res.status, text: await res.text() };
+      } catch (err) {
+        console.warn(`Could not reach ${host}:`, err.message);
+      }
+    }
+    return { ok: false, status: 0, text: "unreachable" };
+  };
+
+  let res = await send(properties);
+  let leadSourceSent = true;
+  // Lead source not added to the form yet: submit without it (it is set on the contact afterwards)
+  if (!res.ok && res.status === 400 && /lead_source/.test(res.text)) {
+    const { [PROPERTIES.leadSource]: _omit, ...rest } = properties;
+    res = await send(rest);
+    leadSourceSent = false;
+  }
+  if (!res.ok) console.warn("Form submission not accepted:", res.status, res.text);
+  return { ...res, leadSourceSent };
+}
+
+// After a form submission, wait briefly for HubSpot to create the contact
+async function waitForContact(email, tries = 5, gapMs = 1200) {
+  for (let i = 0; i < tries; i++) {
+    await sleep(gapMs);
+    const id = await findContactId(email);
+    if (id) return id;
+  }
+  return null;
+}
+
 async function addNote(contactId, html) {
   const res = await hubspot("/crm/v3/objects/notes", "POST", {
     properties: { hs_timestamp: new Date().toISOString(), hs_note_body: html },
@@ -141,6 +198,8 @@ exports.handler = async (event) => {
     consent: p.consent === true,
     consentText: clean(p.consentText, 1000),
     pageUri: clean(p.pageUri, 500),
+    pageName: clean(p.pageName, 200),
+    hutk: clean(p.hutk, 100),
     utm: ["utm_source", "utm_medium", "utm_campaign"].map((k) => [k, clean(p[k], 200)]).filter(([, v]) => v),
     answers: Array.isArray(p.answers) ? p.answers.slice(0, 10).map((a) => ({ q: clean(a.question, 300), a: clean(a.answer, 300) })) : [],
   };
@@ -179,7 +238,7 @@ exports.handler = async (event) => {
       return json(200, { ok: true, contact: "existing", contactId, portalId });
     }
 
-    const created = await createContact({
+    const properties = {
       email: lead.email,
       firstname: lead.firstName,
       lastname: lead.lastName,
@@ -187,28 +246,48 @@ exports.handler = async (event) => {
       [PROPERTIES.avenue]: lead.investmentAvenue,
       [PROPERTIES.answers]: summary.join("\n\n"),
       [PROPERTIES.leadSource]: LEAD_SOURCE_VALUE,
-    });
+    };
 
-    if (created.ok) {
-      contactId = created.data.id;
-    } else if (created.status === 409) {
-      // Created by someone else a moment ago: treat as existing
-      const m = JSON.stringify(created.data).match(/Existing ID: ?(\d+)/);
-      contactId = m ? m[1] : await findContactId(lead.email);
-      if (!contactId) throw new Error(`Conflict without ID: ${JSON.stringify(created.data)}`);
-      await addNote(contactId, noteHtml);
-      const portalId = await getPortalId();
-      console.log(`Lead saved: existing contact ${contactId} (note added), HubSpot account ${portalId}`);
-      return json(200, { ok: true, contact: "existing", contactId, portalId });
-    } else {
-      throw new Error(`Create failed (${created.status}): ${JSON.stringify(created.data)}`);
+    // New email: submit the HubSpot form so the lead shows under Submissions
+    // and the campaign, then confirm HubSpot actually created the contact.
+    let via = "crm";
+    const ip = (event.headers && (event.headers["x-nf-client-connection-ip"] || (event.headers["x-forwarded-for"] || "").split(",")[0].trim())) || "";
+    const context = { pageUri: lead.pageUri || undefined, pageName: lead.pageName || undefined, hutk: lead.hutk || undefined, ipAddress: ip || undefined };
+    const form = await submitForm(properties, context);
+    if (form.ok) {
+      contactId = await waitForContact(lead.email);
+      if (contactId) {
+        via = "form";
+        if (!form.leadSourceSent) {
+          // The contact was created moments ago by this submission, so it is safe to set its lead source
+          await hubspot(`/crm/v3/objects/contacts/${contactId}`, "PATCH", { properties: { [PROPERTIES.leadSource]: LEAD_SOURCE_VALUE } })
+            .catch(() => {});
+        }
+      } else {
+        console.warn("Form accepted but no contact appeared (possibly filtered as spam). Creating it directly.");
+      }
+    }
+
+    if (!contactId) {
+      const created = await createContact(properties);
+      if (created.ok) {
+        contactId = created.data.id;
+      } else if (created.status === 409) {
+        // The form submission (or another request) created it in the meantime
+        const m = JSON.stringify(created.data).match(/Existing ID: ?(\d+)/);
+        contactId = m ? m[1] : await findContactId(lead.email);
+        if (!contactId) throw new Error(`Conflict without ID: ${JSON.stringify(created.data)}`);
+        via = form.ok ? "form" : "crm";
+      } else {
+        throw new Error(`Create failed (${created.status}): ${JSON.stringify(created.data)}`);
+      }
     }
 
     // Record the full enquiry and consent on the new contact too
     await addNote(contactId, noteHtml).catch((err) => console.warn("Note on new contact failed:", err.message));
     const portalId = await getPortalId();
-    console.log(`Lead saved: new contact ${contactId}, HubSpot account ${portalId}`);
-    return json(200, { ok: true, contact: "new", contactId, portalId });
+    console.log(`Lead saved: new contact ${contactId} via ${via}, HubSpot account ${portalId}`);
+    return json(200, { ok: true, contact: "new", via, contactId, portalId });
   } catch (err) {
     console.error("Lead capture failed:", err.message);
     // Include HubSpot's status code (e.g. 401 bad token, 403 missing scope) to help diagnose

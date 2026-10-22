@@ -18,12 +18,12 @@ Add `#quiz` (or `?quiz`) to the page URL, e.g. `https://yoursite.com/#quiz`, and
 
 Leads are saved by a small server function (`netlify/functions/lead.js`) so that existing HubSpot contacts are never changed:
 
-- **New email address:** a new contact is created (with Investment avenue, Questionnaire answers and Lead source "Datamine Marketing Site") plus a note recording the enquiry and consent.
+- **New email address:** the lead is submitted to the HubSpot form "Datamine Site Marketing Form" (so it shows under Submissions and its campaign), with Investment avenue, Questionnaire answers and Lead source "Datamine Marketing Site", plus a note recording the enquiry and consent. If the form rejects it or HubSpot filters it as spam, the contact is created directly instead so the lead is never lost.
 - **Existing email address:** the contact's details are left exactly as they are; a note with the enquiry is added to it.
 
 Because of this function, the site must be deployed **from GitHub**, not by drag and drop:
 
-1. In HubSpot, create a private app with the scopes `crm.objects.contacts.read` and `crm.objects.contacts.write`, and copy its access token.
+1. In HubSpot, create a private app with the scopes `crm.objects.contacts.read`, `crm.objects.contacts.write` and `forms`, and copy its access token.
 2. In Netlify, choose *Add new site → Import an existing project → GitHub*, pick this repository and branch. Build settings are read from `netlify.toml`.
 3. In Netlify, add an environment variable `HUBSPOT_TOKEN` with the token, then redeploy.
 

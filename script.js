@@ -435,6 +435,8 @@ form.addEventListener("submit", async (e) => {
     utm_campaign: params.get("utm_campaign") || "",
     consentText: (form.querySelector(".check span") || {}).textContent || "",
     pageUri: location.href,
+    pageName: document.title,
+    hutk: (document.cookie.match(/(?:^|;\s*)hubspotutk=([^;]+)/) || [])[1] || "",
     submittedAt: new Date().toISOString(),
   };
 
