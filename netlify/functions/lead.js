@@ -60,6 +60,19 @@ async function hubspot(path, method, body) {
   return { ok: res.ok, status: res.status, data };
 }
 
+// Which HubSpot account the token belongs to (helps confirm leads go to the right place)
+let cachedPortalId;
+async function getPortalId() {
+  if (cachedPortalId !== undefined) return cachedPortalId;
+  try {
+    const res = await hubspot("/account-info/v3/details", "GET");
+    cachedPortalId = res.ok && res.data.portalId ? res.data.portalId : null;
+  } catch (_) {
+    cachedPortalId = null;
+  }
+  return cachedPortalId;
+}
+
 async function findContactId(email) {
   const res = await hubspot("/crm/v3/objects/contacts/search", "POST", {
     filterGroups: [{ filters: [{ propertyName: "email", operator: "EQ", value: email }] }],
@@ -161,7 +174,9 @@ exports.handler = async (event) => {
     if (contactId) {
       // Existing contact: do not change any of their details, just log the enquiry
       await addNote(contactId, noteHtml);
-      return json(200, { ok: true, contact: "existing" });
+      const portalId = await getPortalId();
+      console.log(`Lead saved: existing contact ${contactId} (note added), HubSpot account ${portalId}`);
+      return json(200, { ok: true, contact: "existing", contactId, portalId });
     }
 
     const created = await createContact({
@@ -182,14 +197,18 @@ exports.handler = async (event) => {
       contactId = m ? m[1] : await findContactId(lead.email);
       if (!contactId) throw new Error(`Conflict without ID: ${JSON.stringify(created.data)}`);
       await addNote(contactId, noteHtml);
-      return json(200, { ok: true, contact: "existing" });
+      const portalId = await getPortalId();
+      console.log(`Lead saved: existing contact ${contactId} (note added), HubSpot account ${portalId}`);
+      return json(200, { ok: true, contact: "existing", contactId, portalId });
     } else {
       throw new Error(`Create failed (${created.status}): ${JSON.stringify(created.data)}`);
     }
 
     // Record the full enquiry and consent on the new contact too
     await addNote(contactId, noteHtml).catch((err) => console.warn("Note on new contact failed:", err.message));
-    return json(200, { ok: true, contact: "new" });
+    const portalId = await getPortalId();
+    console.log(`Lead saved: new contact ${contactId}, HubSpot account ${portalId}`);
+    return json(200, { ok: true, contact: "new", contactId, portalId });
   } catch (err) {
     console.error("Lead capture failed:", err.message);
     // Include HubSpot's status code (e.g. 401 bad token, 403 missing scope) to help diagnose

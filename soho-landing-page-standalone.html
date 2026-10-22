@@ -1970,6 +1970,7 @@ form.addEventListener("submit", async (e) => {
   // Show the thank-you screen as normal but send nothing.
   const trap = form.querySelector('input[name="hp_check"]');
   if ((trap && trap.value) || Date.now() - resultShownAt < 1500) {
+    console.warn("Spam check triggered: details were not sent.");
     steps.thanks.querySelector(".quiz__thanks-text").textContent = "Thank you. Your details have been received.";
     showStep("thanks");
     return;
@@ -2027,6 +2028,7 @@ form.addEventListener("submit", async (e) => {
         console.error("Lead function error:", res.status, await res.text().catch(() => ""));
         throw new Error(`Lead function status ${res.status}`);
       }
+      console.info("Lead saved:", await res.clone().text().catch(() => ""));
     } else if (hs.portalId && hs.formGuid) {
       await sendToHubSpot(payload);
     }
