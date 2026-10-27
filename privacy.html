@@ -51,6 +51,8 @@
     .updated { color: var(--muted); font-size: 14px; }
     .fill { background: rgba(201, 164, 106, 0.18); color: var(--ink); padding: 0 4px; border-radius: 4px; }
     footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+    /* No text selection or copying on this page */
+    body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   </style>
 </head>
 <body>
@@ -128,6 +130,12 @@
 
     <footer>&copy; <span id="year"></span> Datamine Promotions Limited. All rights reserved.</footer>
   </main>
-  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    // Block copying, cutting and dragging text on this page
+    ["copy", "cut", "dragstart"].forEach(function (type) {
+      document.addEventListener(type, function (e) { e.preventDefault(); });
+    });
+  </script>
 </body>
 </html>
