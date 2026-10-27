@@ -550,6 +550,17 @@ if (track) {
   }
 }
 
+// Block copying, cutting and dragging page text and images (form fields still work normally)
+const isFormField = (el) => el && el.closest && el.closest("input, textarea, select");
+["copy", "cut"].forEach((type) =>
+  document.addEventListener(type, (e) => {
+    if (!isFormField(e.target)) e.preventDefault();
+  })
+);
+document.addEventListener("dragstart", (e) => {
+  if (!isFormField(e.target)) e.preventDefault();
+});
+
 // Open the questionnaire straight away from links ending in #quiz or ?quiz
 if (location.hash === "#quiz" || new URLSearchParams(location.search).has("quiz")) {
   openQuiz();

@@ -39,6 +39,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 em { font-style: italic; color: var(--accent); }
 [hidden] { display: none !important; }
 
+/* No text selection on the page, except in form fields */
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea, select { -webkit-user-select: text; user-select: text; }
+img { -webkit-user-drag: none; }
+
 .container {
   width: 100%;
   max-width: 1240px;
