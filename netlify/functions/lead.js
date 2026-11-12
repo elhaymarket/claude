@@ -120,6 +120,8 @@ async function submitForm(properties, context) {
       fields: Object.entries(props).filter(([, v]) => v).map(([name, value]) => ({ objectTypeId: "0-1", name, value: String(value) })),
       context,
     };
+    // Try each HubSpot address in turn; move on if one rejects the request outright
+    let last = { ok: false, status: 0, text: "unreachable", host: null };
     for (const host of FORM.hosts) {
       try {
         const res = await fetch(`https://${host}/submissions/v3/integration/secure/submit/${FORM.portalId}/${FORM.formGuid}`, {
@@ -127,12 +129,16 @@ async function submitForm(properties, context) {
           headers: { Authorization: `Bearer ${getToken()}`, "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
-        return { ok: res.ok, status: res.status, text: await res.text() };
+        last = { ok: res.ok, status: res.status, text: await res.text(), host };
+        if (res.ok) return last;
+        console.warn(`Form submission via ${host} returned ${res.status}:`, last.text);
+        // Only a validation error (400) is final; anything else, try the next address
+        if (res.status === 400) return last;
       } catch (err) {
         console.warn(`Could not reach ${host}:`, err.message);
       }
     }
-    return { ok: false, status: 0, text: "unreachable" };
+    return last;
   };
 
   let res = await send(properties);
@@ -287,7 +293,9 @@ exports.handler = async (event) => {
     await addNote(contactId, noteHtml).catch((err) => console.warn("Note on new contact failed:", err.message));
     const portalId = await getPortalId();
     console.log(`Lead saved: new contact ${contactId} via ${via}, HubSpot account ${portalId}`);
-    return json(200, { ok: true, contact: "new", via, contactId, portalId });
+    // formStatus/formError explain why a lead was not recorded as a form submission
+    const formInfo = via === "form" ? {} : { formStatus: form.status || null, formError: String(form.text || "").slice(0, 300) };
+    return json(200, { ok: true, contact: "new", via, contactId, portalId, ...formInfo });
   } catch (err) {
     console.error("Lead capture failed:", err.message);
     // Include HubSpot's status code (e.g. 401 bad token, 403 missing scope) to help diagnose
